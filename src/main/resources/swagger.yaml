@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: Rinha Backend
+  version: v1.0
+paths:
+  /pessoas:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/pessoa"
+      responses:
+        '201':
+          $ref: "#/components/responses/criaPessoa"
+        '400':
+          description: Requisição sinteticamente inválida
+        '422':
+          description: Requisição inválida
+        '500':
+          description: Erro de servidor
+    get:
+      parameters:
+        - name: t
+          in: query
+          description: Termo de busca baseando-se no apelido, nome e/ou elementos da stack
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          $ref: "#/components/responses/listaPessoas"
+        '400':
+          description: Parâmetro 't' é obrigatório
+        '500':
+          description: Erro de servidor
+  /pessoas/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: "#/components/responses/coletaPessoa"
+        '404':
+          description: Pessoa não encontrada
+        '500':
+          description: Erro de servidor
+  /contagem-pessoas:
+    get:
+      responses:
+        '200':
+          description: Contagem de pessoas na base
+        '500':
+          description: Erro de servidor
+components:
+  schemas:
+    pessoa:
+      type: object
+      properties:
+        apelido:
+          type: string
+          maxLength: 32
+          minLength: 1
+        nome:
+          type: string
+          maxLength: 100
+          minLength: 1
+        nascimento:
+          type: string
+          format: date
+          example: 1900-12-22
+        stack:
+          type: array
+          items:
+            type: string
+            maxLength: 32
+    pessoaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        apelido:
+          type: string
+          maxLength: 32
+          minLength: 1
+        nome:
+          type: string
+          maxLength: 100
+          minLength: 1
+        nascimento:
+          type: string
+          format: date
+          example: 1900-12-22
+        stack:
+          type: array
+          items:
+            type: string
+            maxLength: 32
+  responses:
+    criaPessoa:
+      description: Response quando uma pessoa é criada
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              location:
+                type: string
+                example: "Location: /pessoas/{id}"
+    coletaPessoa:
+      description: Response de informações de uma pessoa
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/pessoaResponse"
+    listaPessoas:
+      description: Lista de pessoas
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/pessoaResponse"
